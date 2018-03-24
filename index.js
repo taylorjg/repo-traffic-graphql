@@ -14,7 +14,7 @@ if (program.token) {
 }
 
 const getPages = async (query, makeNextQuery) => {
-  const response = await axios.post('', { query });
+  const response = await axios.post("", { query });
   const data = response.data.data;
   const nextQuery = makeNextQuery(data);
   if (nextQuery) {
@@ -25,13 +25,22 @@ const getPages = async (query, makeNextQuery) => {
   }
 };
 
-// const displayRateLimitData = async () => {
-//   const rateLimitResponse = await axios.get("/rate_limit");
-//   const rateLimitData = rateLimitResponse.data;
-//   console.log(`rate limit: ${rateLimitData.resources.core.limit}`);
-//   console.log(`rate remaining: ${rateLimitData.resources.core.remaining}`);
-//   console.log(`rate reset: ${new Date(rateLimitData.resources.core.reset * 1000)}`);
-// };
+const displayRateLimitData = async () => {
+  const query = `
+    query {
+      rateLimit {
+        limit
+        remaining
+        resetAt
+      }
+    }`;
+  const response = await axios.post("", { query });
+  const rateLimit = response.data.data.rateLimit;
+  console.log(`limit: ${rateLimit.limit}`);
+  console.log(`remaining: ${rateLimit.remaining}`);
+  console.log(`resetAt: ${rateLimit.resetAt}`);
+};
+
 
 const handleError = err => {
   if (err.response) {
@@ -60,7 +69,7 @@ const flatten = xs => [].concat(...xs);
 
 const asyncWrapper = async () => {
   try {
-    // await displayRateLimitData();
+    await displayRateLimitData();
 
     const makeRepoQuery = cursor => {
       const after = cursor ? `after: "${cursor}", ` : "";
@@ -114,7 +123,7 @@ const asyncWrapper = async () => {
     //   console.log(`${repoName}     ${viewsNumbers}     ${clonesNumbers}     ${stars}`);
     // });
 
-    // await displayRateLimitData();
+    await displayRateLimitData();
   }
   catch (err) {
     handleError(err);
