@@ -62,44 +62,27 @@ const asyncWrapper = async () => {
   try {
     // await displayRateLimitData();
 
-    const initialQuery = `{
-      user(login: "${program.username}") {
-        name
-        repositories(first: ${program.pageSize}, orderBy: {field: CREATED_AT, direction: DESC}) {
-          edges {
-            node {
-              id
-              name
+    const makeRepoQuery = cursor => {
+      const after = cursor ? `after: "${cursor}", ` : "";
+      return `{
+        user(login: "${program.username}") {
+          repositories(first: ${program.pageSize}, ${after} orderBy: {field: CREATED_AT, direction: DESC}) {
+            edges {
+              node {
+                id
+                name
+              }
+              cursor
             }
-            cursor
           }
         }
-      }
-    }`;
+      }`;
+    };
 
+    const initialQuery = makeRepoQuery();
     const results = await getPages(initialQuery, data => {
       const edges = data.user.repositories.edges;
-      if (edges.length) {
-        const cursor = edges.slice(-1)[0].cursor;
-        const nextQuery = `{
-          user(login: "${program.username}") {
-            name
-            repositories(first: ${program.pageSize}, after: "${cursor}", orderBy: {field: CREATED_AT, direction: DESC}) {
-              edges {
-                node {
-                  id
-                  name
-                }
-                cursor
-              }
-            }
-          }
-        }`;
-        return nextQuery;
-      }
-      else {
-        return null;
-      }
+      return edges.length ? makeRepoQuery(edges.slice(-1)[0].cursor) : null;
     });
 
     const repositories = flatten(results.map(data => data.user.repositories.edges));
