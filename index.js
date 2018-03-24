@@ -56,7 +56,7 @@ const handleError = err => {
   }
 };
 
-// const flatten = xs => [].concat(...xs);
+const flatten = xs => [].concat(...xs);
 
 const asyncWrapper = async () => {
   try {
@@ -102,35 +102,9 @@ const asyncWrapper = async () => {
       }
     });
 
-    console.log(`results.length: ${results.length}`);
-    console.log(JSON.stringify(results, null, 2));
-
-    // const results = [];
-    // let indent = 0;
-    // for (let index = 0; index < repos.length; index++) {
-    //   try {
-    //     const repo = repos[index];
-    //     const viewsPromise = axios.get(`/repos/${repo.owner.login}/${repo.name}/traffic/views`);
-    //     const clonesPromise = axios.get(`/repos/${repo.owner.login}/${repo.name}/traffic/clones`);
-    //     const [{ data: views }, { data: clones }] = await Promise.all([viewsPromise, clonesPromise]);
-
-    //     const result = {
-    //       repo,
-    //       views,
-    //       clones
-    //     };
-
-    //     results.push(result);
-
-    //     process.stdout.write(".");
-    //     indent++;
-    //   }
-    //   catch (err) {
-    //     indent && process.stdout.write("\n");
-    //     indent = 0;
-    //     handleError(err);
-    //   }
-    // }
+    const repositories = flatten(results.map(data => data.user.repositories.edges));
+    console.log(JSON.stringify(repositories, null, 2));
+    console.log(`repositories.length: ${repositories.length}`);
 
     // const compareResults = (a, b) => {
     //   const compareViewsCount = b.views.count - a.views.count;
