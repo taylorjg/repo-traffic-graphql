@@ -80,6 +80,9 @@ const asyncWrapper = async () => {
               node {
                 id
                 name
+                stargazers {
+                  totalCount
+                }
               }
               cursor
             }
@@ -95,33 +98,22 @@ const asyncWrapper = async () => {
     });
 
     const repositories = flatten(results.map(data => data.user.repositories.edges));
-    console.log(JSON.stringify(repositories, null, 2));
-    console.log(`repositories.length: ${repositories.length}`);
 
-    // const compareResults = (a, b) => {
-    //   const compareViewsCount = b.views.count - a.views.count;
-    //   const compareClonesCount = b.clones.count - a.clones.count;
-    //   return compareViewsCount ? compareViewsCount : compareClonesCount;
-    // };
+    const compareRepositories = (a, b) => {
+      return b.node.stargazers.totalCount - a.node.stargazers.totalCount;
+    };
 
-    // const filteredSortedResults = results
-    //   .filter(result => result.views.count || result.clones.count)
-    //   .sort(compareResults);
+    const filteredSortedRepositories = repositories
+      .filter(result => result.node.stargazers.totalCount)
+      .sort(compareRepositories);
+  
+    const REPO_NAME_COL_WIDTH = 35;
 
-    // const REPO_NAME_COL_WIDTH = 30;
-    // const COUNT_COL_WIDTH = 5;
-
-    // filteredSortedResults.forEach(result => {
-    //   const repoName = result.repo.name.padEnd(REPO_NAME_COL_WIDTH);
-    //   const viewsCount = String(result.views.count).padStart(COUNT_COL_WIDTH);
-    //   const viewsUniques = String(result.views.uniques).padStart(COUNT_COL_WIDTH);
-    //   const clonesCount = String(result.clones.count).padStart(COUNT_COL_WIDTH);
-    //   const clonesUniques = String(result.clones.uniques).padStart(COUNT_COL_WIDTH);
-    //   const viewsNumbers = `views: ${viewsCount} / ${viewsUniques}`;
-    //   const clonesNumbers = `clones: ${clonesCount} / ${clonesUniques}`;
-    //   const stars = `stars: ${result.repo.stargazers_count}`;
-    //   console.log(`${repoName}     ${viewsNumbers}     ${clonesNumbers}     ${stars}`);
-    // });
+    filteredSortedRepositories.forEach(repo => {
+      const repoName = repo.node.name.padEnd(REPO_NAME_COL_WIDTH);
+      const stars = `stars: ${repo.node.stargazers.totalCount}`;
+      console.log(`${repoName}     ${stars}`);
+    });
 
     await displayRateLimitData();
   }
